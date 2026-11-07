@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import os
 import tempfile
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List
 
@@ -117,6 +117,80 @@ class EmployeeManager:
             return True
         return False
     
+
+# -------------------- Cau hinh Employee.txt ------------------- #
+
+TEMPLATE = """\
+#DANH SÁCH NHÂN VIÊN 
+# - Syntax: "employee_id|employee_name[|status]"
+# - Dòng trống và dòng bắt đầu bằng '#' sẽ bị bỏ qua.
+# - Ví dụ : NV001|Họ và tên nhân viên
+"""
+
+@dataclass
+class LoadResult:
+    employees: List[Employee] = field(default_factory = list)
+    errors: List[str] = field(default_factory = list)
+    template_created: bool = False
     
+def write_templete(path: Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents = True, exist_ok = True)
+    path.write_text(TEMPLATE, encoding = "utf-8")
     
+def parse_employees(text: str) -> LoadResult:
+    result = LoadResult()
+    seen: set = set()
+    for n, raw in enumerate(text.splitlines(), 1):
+        line = raw.strip().lstrip("\uffef")
+        if not line or line.startswith("#"):
+            continue
+        parts = [p.strip() for p in line.split("|")]
+        if len(parts) not in (2, 3) or not parts[0]:
+            result.errors.append(f"Dòng {n}: sai định dạng! (Lỗi Syntax)")
+            continue
+        status = EmployeeStatus.AVAILABLE
+        if len(parts) == 3 and parts[2]:
+            try:
+                status = EmployeeStatus(parts[2].upper())
+            except ValueError:
+                result.errors.append(f"Dòng {n}: Trạng thái {parts[2]!r} không hợp lệ!")
+                continue
+            if status == EmployeeStatus.BUSY:
+                result.errors.append(f"Dòng {n}: Lần đầu khai báo không được nhận trạng thái BUSY!")
+                continue
+        if parts[0] in seen or any(c.isspace() for c in parts[0]):
+            result.error.append(f"Dòng {n}: Mã nhân viên {parts[0]!r} đã tồn tại hoặc chứa khoảng trắng!")
+            continue
+        seen.add(parts[0])
+        result.employees.append(Employee(parts[0], parts[1] or parts[0], status))
+    return result
+
+def load_employee(path: Path) -> LoadResult:
+    path = Path(path)
+    if not path.exists():
+        write_templete(path)
+        log.warning("Chưa tồn tại %s, đã tạo file mẫu. Hãy thêm nhân viên và chạy lại!", path)
+        return LoadResult(template_created = True)
+    result = parse_employees(path.read_text(encoding = "utf-8"))
+    for err in result.errors:
+        log.warning("%s: %s", path.name, err)
+    return result
+
+def save_employee(path: Path, employees: Iterable[Employee]) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents = True, exist_ok = True)
+    lines = [TEMPLATE.rstrip("\n").split("# - Ví dụ")[0].rstrip("\n")]
+    for e in employees:
+        status = EmployeeStatus.AVAILABLE if e.status == EmployeeStatus.BUSY else e.status
+        lines.append(f"{e.employee_id}|{e.name}|{status.value}")
+    fd, tmp = tempfile.mkstemp(dir = str(path.parent), suffix = ".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding = "utf-8", newline = "\n") as f:
+            f.write("\n".join(lines) + "\n")
+        os.replace(tmp, path)
+    except Exception:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
     
