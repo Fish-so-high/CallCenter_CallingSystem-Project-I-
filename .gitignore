@@ -1,0 +1,33 @@
+# Global
+.env
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Log Data
+logs/*
+!logs/.gitkeep
+raw_data/*.csv
+data/raw_data/*.csv
+data/input_testcase.txt
+
+# Build
+build/
+dist/
+*.spec.bak
+
+# IDE / Windows
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+data/settings.json
+data/scheduler_state.json
