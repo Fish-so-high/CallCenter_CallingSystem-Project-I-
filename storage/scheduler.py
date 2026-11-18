@@ -205,7 +205,7 @@ class DailyScheduler:
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()
-        self._thread = threading.Thread(target=self._loop, name="callflow-scheduler", daemon=True)
+        self._thread = threading.Thread(target=self._loop, name="callcenter-scheduler", daemon=True)
         self._thread.start()
         log.info("Bộ lập lịch đã chạy: %s", ", ".join(t.name for t in self.tasks))
 
