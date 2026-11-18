@@ -91,7 +91,7 @@ class GeneratorWorker(threading.Thread):
                  waiting_provider: Callable[[], int] = lambda: 0,
                  on_exhausted: Optional[Callable[[], None]] = None,
                  record_path: Optional[Path] = None) -> None:
-        super().__init__(name="callflow-generator", daemon=True)
+        super().__init__(name="callcenter-generator", daemon=True)
         self.source, self.out, self._waiting = source, out, waiting_provider
         self._on_exhausted = on_exhausted
         self._record_path = Path(record_path) if record_path else None

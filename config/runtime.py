@@ -13,7 +13,7 @@ from generator.test_case_generator import DEFAULT_EVENT_WEIGHTS, GeneratorConfig
 
 from .settings import BASE_DIR, DEFAULT_EXPORT_DIR
 
-SETTING_PATH = BASE_DIR / "data" / "settings.json"
+SETTINGS_PATH = BASE_DIR / "data" / "settings.json"
 
 def parse_hhmm(text: str):
     import re
@@ -37,7 +37,7 @@ class RuntimeConfig:
     heavy_threshold: int = 50
     event_weights: Dict[str, float] = field(default_factory=lambda: dict(DEFAULT_EVENT_WEIGHTS))
     seed: Optional[int] = None
-    source_code: str = "random"
+    source_mode: str = "random"
     replay_file: str = "data/input_testcase.txt"
     record_generated: bool = False
     
@@ -82,7 +82,7 @@ class RuntimeConfig:
 
     
     @classmethod
-    def load(cls, path: Path = SETTING_PATH) -> "RuntimeConfig":
+    def load(cls, path: Path = SETTINGS_PATH) -> "RuntimeConfig":
         try:
             raw =  json.load(Path(path).read_text(encoding="utf-8"))
         except FileNotFoundError:
@@ -96,13 +96,13 @@ class RuntimeConfig:
         return cfg if not cfg.validate_loose() else cls()
     
     def validate_loose(self) -> List[str]:
-        saved, self.source_code = self.source_code, "random"
+        saved, self.source_mode = self.source_mode, "random"
         try: 
             return self.validate()
         finally:
-            self.source_code = saved
+            self.source_mode = saved
             
-    def save(self, path: Path = SETTING_PATH) -> None:
+    def save(self, path: Path = SETTINGS_PATH) -> None:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         fd, tmp = tempfile.mkstemp(dir=path.parent, suffix=".tmp")

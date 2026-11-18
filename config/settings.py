@@ -30,8 +30,8 @@ class ConfigError(ValueError):
 class DatabaseSettings:
     host: str = "localhost"
     port: int = 5432
-    name: str = "callflow_db"
-    user: str = "callflow"
+    name: str = "callcenter_db"
+    user: str = "callcenter"
     password: str = field(default="", repr=False) 
     connect_timeout: int = 5
 
@@ -60,8 +60,8 @@ class DatabaseSettings:
         return cls(
             host=env.get("DB_HOST", "localhost"),
             port=port,
-            name=env.get("DB_NAME", "callflow_db"),
-            user=env.get("DB_USER", "callflow"),
+            name=env.get("DB_NAME", "callcenter_db"),
+            user=env.get("DB_USER", "callcenter"),
             password=env.get("DB_PASSWORD", ""),
             connect_timeout=timeout,
         )
@@ -88,11 +88,11 @@ def load_settings(env: Optional[Mapping[str, str]] = None, *, use_dotenv: bool =
         except ImportError: 
             pass
     source = os.environ if env is None else env
-    export_dir = Path(source.get("CALLFLOW_EXPORT_DIR") or DEFAULT_EXPORT_DIR)
+    export_dir = Path(source.get("CALLCENTER_EXPORT_DIR") or DEFAULT_EXPORT_DIR)
     if not export_dir.is_absolute():
         export_dir = BASE_DIR / export_dir
     return AppSettings(
         database=DatabaseSettings.from_env(source),
         export_dir=export_dir,
-        timezone=source.get("CALLFLOW_TIMEZONE", DEFAULT_TIMEZONE),
+        timezone=source.get("CALLCENTER_TIMEZONE", DEFAULT_TIMEZONE),
     )

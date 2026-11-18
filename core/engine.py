@@ -53,7 +53,7 @@ class _RecentIds:
         return True
 
 
-class CallFlowEngine:
+class CallCenterEngine:
     def __init__(self, employees: Iterable[Employee] = (), config: Optional[EngineConfig] = None,
                  dispatcher: Optional[EventDispatcher] = None) -> None:
         self.config = config or EngineConfig()
