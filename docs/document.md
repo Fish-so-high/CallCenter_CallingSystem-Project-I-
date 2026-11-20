@@ -1,4 +1,4 @@
-# Tài liệu Kỹ thuật Hệ thống CallCenter
+# Tài liệu về Kiến trúc Mô hình CallCenter
 
 ## Mục lục
 1. [Tổng quan Kiến trúc Mô hình CallCenter](#1-tổng-quan-kiến-trúc-mô-hình-callcenter)
